@@ -1,15 +1,17 @@
+import { GetRoleDTO } from './dto/get-all-role.dto';
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ResponseService } from 'src/utils/response.service';
+import { Like, Repository } from 'typeorm';
+import { PaginateService } from './../../utils/paginate.service';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role, RoleName } from './entities/role.entity';
 import { ErrorResponse } from './exceptions/exceptions.response';
-import { ResponseService } from 'src/utils/response.service';
 
 @Injectable()
 export class RolesService {
@@ -17,7 +19,35 @@ export class RolesService {
     @InjectRepository(Role)
     private rolesRepository: Repository<Role>,
     private res: ResponseService,
+    private paginate: PaginateService,
   ) {}
+
+  async create(createRoleDto: CreateRoleDto) {
+    const role: any = this.rolesRepository.create(createRoleDto);
+    await this.rolesRepository.save(role);
+    return this.res.success(role);
+  }
+
+  async findAll(getRoleDTO: GetRoleDTO) {
+    const page = getRoleDTO.page ? getRoleDTO.page : 1;
+    const limit = getRoleDTO.limit ? getRoleDTO.limit : 10;
+    const order = getRoleDTO.order;
+    const keyword = getRoleDTO.keyword;
+    const skip = (page - 1) * limit;
+    let conditions = {};
+
+    if (getRoleDTO.keyword) {
+      conditions['name'] = Like(`%${keyword}%`);
+    }
+    const [roles, total] = await this.rolesRepository.findAndCount({
+      where: conditions,
+      order: { createdAt: order },
+      take: limit,
+      skip: skip,
+    });
+    const result = this.paginate.create(roles, total, page, limit);
+    return this.res.success(result);
+  }
 
   async findAdminRole(): Promise<Role> {
     const role = await this.rolesRepository.findOne({
@@ -25,24 +55,39 @@ export class RolesService {
     });
 
     if (!role) {
-      throw new BadRequestException(ErrorResponse.AdminRoleNotFound);
+      throw new BadRequestException(ErrorResponse.adminRoleNotFound);
     }
 
     return role;
   }
 
-  // public async findOneOrFail(options: FindConditions<Role>): Promise<Role> {
-  //   const role = await this.rolesRepository.findOne(options);
+  public async findOneByID(id: number) {
+    const role = await this.rolesRepository.findOne({ where: { id } });
 
-  //   if (!role) {
-  //     throw new UnprocessableEntityException(ExceptionsResponse.roleNotFound);
-  //   }
+    if (!role) {
+      throw new UnprocessableEntityException(ErrorResponse.roleNotFound);
+    }
 
-  //   return role;
-  // }
+    return role;
+  }
 
-  // public async update(id: number, updateRoleDto: UpdateRoleDto) {
-  //   const role = await this.findOneOrFail({ id });
-  //   return await role.save();
-  // }
+  public async getDetail(id: number) {
+    const role = await this.rolesRepository.findOne({ where: { id } });
+
+    if (!role) {
+      throw new UnprocessableEntityException(ErrorResponse.roleNotFound);
+    }
+
+    return this.res.success(role);
+  }
+
+  public async update(id: number, updateRoleDto: UpdateRoleDto) {
+    await this.findOneByID(id);
+    let dataUpdate = {
+      id: id,
+      ...updateRoleDto,
+    };
+    const role = await this.rolesRepository.save(dataUpdate);
+    return this.res.success(role);
+  }
 }

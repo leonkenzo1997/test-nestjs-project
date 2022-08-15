@@ -2,7 +2,7 @@ echo "Deploying Apillz Api"
 
 ssh -i ./apillz.pem ec2-user@3.35.9.111 <<EOF
 
-     echo "=> Pulling build from develop"
+    echo "=> Pulling build from develop"
 
     cd apillz-backend
 

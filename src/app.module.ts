@@ -1,18 +1,18 @@
-import { Module, CacheModule } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
-import { AppModule as AppV1Module } from './v1/app.module';
-import { UtilsModule } from './utils/utils.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import jwtConfig from '../config/jwt.config';
+import awsConfig from '../config/aws.config';
 import databaseConfig from '../config/database.config';
+import jwtConfig from '../config/jwt.config';
 import mailConfig from '../config/mail.config';
-import webConfig from '../config/web.config';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './exceptions/http-exception.filter';
-import { DbExceptionFilter } from './exceptions/db-exception.filter';
 import { configValidationSchema } from '../config/validation/config-validation';
-import awsConfig from 'config/aws.config';
+import webConfig from '../config/web.config';
+import { DbExceptionFilter } from './exceptions/db-exception.filter';
+import { HttpExceptionFilter } from './exceptions/http-exception.filter';
+import { UtilsModule } from './utils/utils.module';
+import { AppModule as AppV1Module } from './v1/app.module';
 
 @Module({
   imports: [

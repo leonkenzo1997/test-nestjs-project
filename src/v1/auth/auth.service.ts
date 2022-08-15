@@ -69,8 +69,8 @@ export class AuthService {
     //Generate access and refresh token
 
     const [accessToken, refreshToken] = [
-      this.tokenService.generateAccessToken(user.id, session.id, user.role),
-      this.tokenService.generateRefreshToken(user.id, session.id, user.role),
+      this.tokenService.generateAccessToken(user.id, session.id, user.role.id),
+      this.tokenService.generateRefreshToken(user.id, session.id, user.role.id),
     ];
 
     //return user info and token

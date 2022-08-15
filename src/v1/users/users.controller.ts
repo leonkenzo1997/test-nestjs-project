@@ -6,8 +6,8 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('admin')
-  createAdmin(@Body() createAdminDto: CreateAdminDto) {
-    return this.usersService.createAdmin(createAdminDto);
-  }
+  // @Post('admin')
+  // createAdmin(@Body() createAdminDto: CreateAdminDto) {
+  //   return this.usersService.createAdmin(createAdminDto);
+  // }
 }
